@@ -8,32 +8,64 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/features2d/features2d.hpp>
-#include <opencv2/ximgproc/fast_line_detector.hpp>
-#include <opencv2/ximgproc/edge_drawing.hpp>
+#include <opencv2/imgproc.hpp>
+//#include <opencv2/ximgproc/fast_line_detector.hpp>
+//#include <opencv2/ximgproc/edge_drawing.hpp>
 #include <iostream>
 #include <stdio.h>
 #include "glog/logging.h"
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include "sophus/se3.h"
 
 using namespace cv;
 using namespace std;
 
 /* Struct holding the parameters for one camera */
-struct CalibParams
+struct CalibParams {
+    // Eigen::Matrix3d intrinsic;
+    // Eigen::Vector4d distortion;
+    // Sophus::SE3 extrinsic;
+    double pitch;
+    double yaw;
+    double roll;
+    double dX;
+    double dY;
+    double cX;
+    double cY;
+    double d1;
+    double d2;
+    double d3;
+    double d4;
+};
 
 
 /* Struct for all four cameras */
-struct camera_set
+struct camera_set {
+    CalibParams camera_F;
+    CalibParams camera_L;
+    CalibParams camera_B;
+    CalibParams camera_R;
+};
 
 
 /* Struct for lanemarks */
-struct lanemarks
+struct lanemarks {
+
+};
 
     
-struct one_frame_lines
+struct one_frame_lines {
 
-struct one_frame_lines_set
+};
 
-struct vanishing_pts
+struct one_frame_lines_set {
+
+};
+
+struct vanishing_pts {
+
+};
 
 
 /* create a new CalibParams struct and initialize it
@@ -46,10 +78,10 @@ one_frame_lines_set* one_frame_set_new();
 /* Initialize the intrinsic parameters based on a camera
  *
  * camera: a pointer to CalibParams holding the parameters of the camera
- * cam_matrix: a pointer holding the return val&ue of the camera matrix
+ * cam_matrix: a pointer holding the return value of the camera matrix
  * dist_coeffs: a pointer holding the return value of the distortion coefficients
  */
-void init_intrinsic;
+void init_intrinsic(CalibParams* camera, Eigen::Matrix3d cam_matrix, Eigen::Vector4d dist_coeffs);
 
 
 /* Calculate the rotation matrix R based on a camera's pitch, yaw, and roll angles
@@ -57,7 +89,7 @@ void init_intrinsic;
  * camera: a pointer to CalibParams holding the parameters of the camera
  * R: a pointer holding the return value of the rotation matrix
  */
-void rotation_homography;
+void rotation_homography(CalibParams* camera, Eigen::Matrix3d &R);
 
 
 /* Calculate the translation matrix R based on the rotation matrix
@@ -67,16 +99,16 @@ void rotation_homography;
  * R: a pointer holding the return value of the rotation matrix
  * T: a pointer holding the return value of the translation matrix
  */
-void translation_homography;
+void translation_homography(CalibParams* camera, Eigen::Matrix3d &R, Sophus::SE3 &T);
 
-void ENURotationFromEuler;
+void ENURotationFromEuler(Eigen::Matrix3d &R);
 
 /* Adjust the orientation of the rotation and translation matrix from zyx to yxz
  *
  * R: a pointer to the rotation matrix
  * T: a pointer to the translation matrix
  */
-void homography_adjust;
+void homography_adjust(Eigen::Matrix3d &R, Sophus::SE3 &T);
 
 
 //RANSAC fit 2D straight line
@@ -104,27 +136,27 @@ void homography_adjust;
  *
  * birdeye_img: a pointer to the birdeye image
  */
-void detect_line;
+void detect_line(cv::Mat birdeye_img);
 
 
-/* transorm one fisheye image into a birdeye image with the camera parameters
+/* transform one fisheye image into a birdeye image with the camera parameters
  *
  * camera: a pointer to CalibParams holding the parameters of the camera
  * img: a pointer to the fisheye image
  */
-void birdeye_oneview_transform;
+cv::Mat&  birdeye_oneview_transform(CalibParams* camera, cv::Mat fisheye_img);
 
 
-void oneview_extract_line;
+void oneview_extract_line(cv::Mat birdeye_img);
 
 /* transform all four fisheye images with four cameras' parameters
  *
  * cameras: a pointer to camera_set struct holding parameters of all four cameras
  * all_img: a pointer to all four fisheye images
  */
-void birdeye_transform;
+vector<cv::Mat>& birdeye_transform(camera_set *cameras, vector<cv::Mat> all_img);
 
-void line_pairing;
+void line_pairing();
 
 //RANSAC fit 2D straight line
 //Input parameters: points--input point set
@@ -139,78 +171,78 @@ void line_pairing;
 //              vector collinear to the line and (x0, y0) is some
 //              point on the line.
 //Return value: none
-void fitLineRansac;
+void fitLineRansac();
 
-static float GetDist;
+static float GetDist();
 
 // get angle with positive vale between 2 line segments
-static float GetAngle;
+static float GetAngle();
 
 // get angle with positive value between input line and iamge x axis
-static float GetAngle;
+static float GetAngle();
 
-static float GetX;
+static float GetX();
 
 // determine whether 2 lines is colinear
-static float GetSimilarity;
+static float GetSimilarity();
 
-static void Kmeans;
+static void Kmeans();
 
-void FilterLines;
+void FilterLines();
 
-void duplicate_filter;
+void duplicate_filter();
 
-void length_filter;
+void length_filter();
 
-void range_filter;
+void range_filter();
 
-void orientation_filter;
+void orientation_filter();
 
-void average_vanish_pt;
+void average_vanish_pt();
 
-void get_vanish_pt;
+void get_vanish_pt();
 
-double get_pitch;
+double get_pitch();
 
-void get_Hmax;
+void get_Hmax();
 
-void side_cam_Hmax;
+void side_cam_Hmax();
 
-void front_back_cam_Hmax;
+void front_back_cam_Hmax();
 
-void get_h;
+void get_h1();
 
-void get_h;
+void get_h2();
 
-void get_h;
+void get_h3();
 
-void calculate_H;
+void calculate_H();
 
-void get_virtual_K;
+void get_virtual_K();
 
-void get_updated_R;
+void get_updated_R();
 
-double get_rotation_axis_and_angle;
+double get_rotation_axis_and_angle();
 
-void outlier_filter;
+void outlier_filter();
 
-float get_slope;
+float get_slope();
 
-float get_intercept;
+float get_intercept();
 
-float get_x;
+float get_x();
 
-bool location_check;
+bool location_check();
 
-void find_closest_lane;
+void find_closest_lane();
 
-bool cluter_filter;
+bool cluter_filter();
 
-void get_cluster_median;
+void get_cluster_median();
 
-void cluster_vpt_set;
+void cluster_vpt_set();
 
-void lanes_filter;
+void lanes_filter();
 
 #endif /* line_extractor_hpp */
 
